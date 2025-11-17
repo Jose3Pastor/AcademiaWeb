@@ -3,19 +3,38 @@ import FichaTreino from "../models/FichaTreinoModel.js";
 
 class FichaTreinoDAO {
   
-  async listarPorPlano(idPlano) {
+    async listarPorPlano(idPlano) {
     const [rows] = await db.query(
-      "SELECT * FROM FichaTreino WHERE fk_id_plano = ?",
+      `SELECT
+          f.*,
+          p.descricao AS plano_descricao,
+          a.nome AS nome_aluno,
+          i.nome AS nome_instrutor
+       FROM FichaTreino f
+       JOIN PlanoTreino p ON p.id_plano = f.fk_id_plano
+       JOIN Aluno a ON a.id_aluno = p.fk_id_aluno
+       JOIN Instrutor i ON i.id_instrutor = p.fk_id_instrutor
+       WHERE f.fk_id_plano = ?`,
       [idPlano]
     );
 
-    return rows.map(
-      r =>
-        new FichaTreino(
-          r.id_ficha, r.fk_id_plano, r.nome, r.data_inicio,
-          r.data_fim, r.observacoes, r.ativo
-        )
+    return rows;
+  }
+
+  async buscarPorId(idFicha) {
+    const [rows] = await db.query(
+      `SELECT
+          f.*,
+          p.descricao AS plano_descricao,
+          i.nome AS nome_instrutor
+       FROM FichaTreino f
+       JOIN PlanoTreino p ON p.id_plano = f.fk_id_plano
+       JOIN Instrutor i ON i.id_instrutor = p.fk_id_instrutor
+       WHERE f.id_ficha = ?`,
+      [idFicha]
     );
+
+    return rows[0] || null;
   }
 
   async criar(ficha) {

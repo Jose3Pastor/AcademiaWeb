@@ -2,42 +2,71 @@ import db from "../config/db.js";
 import Pagamento from "../models/PagamentoModel.js";
 
 class PagamentoDAO {
+  // async listarTodos() {
+  //   const [rows] = await db.query("SELECT * FROM Pagamento");
+  //   return rows.map(
+  //     (r) =>
+  //       new Pagamento(
+  //         r.id_pagamento,
+  //         r.fk_id_aluno,
+  //         r.valor,
+  //         r.data_pagamento,
+  //         r.data_validade,
+  //         r.metodo_pagamento,
+  //         r.status,
+  //         r.tipo_plano
+  //       )
+  //   );
+  // }
+
+  // async listarPorAluno(idAluno) {
+  //   const [rows] = await db.query(
+  //     "SELECT * FROM Pagamento WHERE fk_id_aluno = ? ORDER BY data_validade DESC",
+  //     [idAluno]
+  //   );
+
+  //   return rows.map(
+  //     (r) =>
+  //       new Pagamento(
+  //         r.id_pagamento,
+  //         r.fk_id_aluno,
+  //         r.valor,
+  //         r.data_pagamento,
+  //         r.data_validade,
+  //         r.metodo_pagamento,
+  //         r.status,
+  //         r.tipo_plano
+  //       )
+  //   );
+  // }
+
   async listarTodos() {
-    const [rows] = await db.query("SELECT * FROM Pagamento");
-    return rows.map(
-      (r) =>
-        new Pagamento(
-          r.id_pagamento,
-          r.fk_id_aluno,
-          r.valor,
-          r.data_pagamento,
-          r.data_validade,
-          r.metodo_pagamento,
-          r.status,
-          r.tipo_plano
-        )
+    const [rows] = await db.query(
+      `SELECT 
+          p.*,
+          a.nome AS nome_aluno,
+          a.matricula AS matricula_aluno
+       FROM Pagamento p
+       JOIN Aluno a ON a.id_aluno = p.fk_id_aluno
+       ORDER BY p.data_pagamento DESC`
     );
+
+    return rows;
   }
 
   async listarPorAluno(idAluno) {
     const [rows] = await db.query(
-      "SELECT * FROM Pagamento WHERE fk_id_aluno = ? ORDER BY data_validade DESC",
+      `SELECT 
+          p.*,
+          a.nome AS nome_aluno
+       FROM Pagamento p
+       JOIN Aluno a ON a.id_aluno = p.fk_id_aluno
+       WHERE p.fk_id_aluno = ?
+       ORDER BY p.data_pagamento DESC`,
       [idAluno]
     );
 
-    return rows.map(
-      (r) =>
-        new Pagamento(
-          r.id_pagamento,
-          r.fk_id_aluno,
-          r.valor,
-          r.data_pagamento,
-          r.data_validade,
-          r.metodo_pagamento,
-          r.status,
-          r.tipo_plano
-        )
-    );
+    return rows;
   }
 
   async criar(p) {
@@ -105,17 +134,15 @@ class PagamentoDAO {
   }
 
   async editarParcial(idPagamento, campos) {
-  const keys = Object.keys(campos);
-  const values = Object.values(campos);
+    const keys = Object.keys(campos);
+    const values = Object.values(campos);
 
-  const sql =
-    `UPDATE Pagamento SET ${keys.map(k => `${k} = ?`).join(", ")} 
+    const sql = `UPDATE Pagamento SET ${keys.map((k) => `${k} = ?`).join(", ")} 
      WHERE id_pagamento = ?`;
 
-  const [result] = await db.query(sql, [...values, idPagamento]);
-  return result.affectedRows;
-}
-
+    const [result] = await db.query(sql, [...values, idPagamento]);
+    return result.affectedRows;
+  }
 }
 
 export default new PagamentoDAO();

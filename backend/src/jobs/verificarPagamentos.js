@@ -3,7 +3,7 @@ import PagamentoDAO from "../dao/PagamentoDAO.js";
 import AlunoDAO from "../dao/AlunoDAO.js";
 
 function verificarPagamentosAtrasados() {
-  //"* * * * *"
+  //"* * * * *". */10 * * * * *
   // roda todo dia à meia-noite
   cron.schedule("0 0 * * *", async () => {
     console.log("⏳ Rodando verificação diária de pagamentos...");
